@@ -212,9 +212,15 @@ class Router:
         # determine which router sent the update
         r = pbody[NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+1:NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+3]
         # extract the distance vector
-        rtable = json.loads(pbody[NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+3:])
+        rvec = json.loads(pbody[NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+3:])
 
-        # update according to Bellman-Ford
+        # for each destination listed in the current routing table,
+        # update the cost vector at r to the new value
+        for dst, cvec in self.self.rt_tbl_D.items():
+            cvec[r] = rvec[dst][r]
+
+        # update according to Bellman-Ford equation
+
 
         print('%s: Received routing update %s from interface %d' % (self, p, i))
 
