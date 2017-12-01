@@ -143,7 +143,7 @@ class Router:
         print(cost_D)
 
         # set up the routing table for connected hosts as {destination: {router: cost}}
-        self.rt_tbl_D = {neighbor:{neighbor: v for k,v in cost_D[neighbor].items()} for neighbor in cost_D}
+        self.rt_tbl_D = {neighbor:{self.name: v for k,v in cost_D[neighbor].items()} for neighbor in cost_D}
         self.rt_tbl_D[self.name] = {self.name: 0}
         print(self.rt_tbl_D)
         print('%s: Initialized routing table' % self)
@@ -213,9 +213,47 @@ class Router:
 
     ## Print routing table
     def print_routes(self):
-        #TODO: print the routes as a two dimensional table
-        print(self.rt_tbl_D)
+        pstr = '+' # output string
+        borderStr = '===+'
+        linesepStr = '---+'
 
+        # add top border
+        for _ in range(len(self.rt_tbl_D)+1):
+            pstr += borderStr
+        pstr += '\n|' + self.name + ' |'
+        # Add column names
+        for k, _ in self.rt_tbl_D.items():
+            pstr += " " + k + "|"
+        pstr += '\n'
+
+        # add bottom header border
+        pstr += "+"
+        for _ in range(len(self.rt_tbl_D)+1):
+            pstr += borderStr
+        pstr += '\n|'
+
+        # add body of table
+        count = 0
+        for key in self.rt_tbl_D[self.name].keys():
+            if count > 0:
+                pstr += "+"
+                for _ in range(len(self.rt_tbl_D)+1):
+                    pstr += linesepStr
+
+            pstr += key + " |"
+            for _, v in self.rt_tbl_D.items():
+                pstr += str(v[key]).rjust(3) + "|" # rjust necessary here if costs go into double-digits
+            pstr += '\n'
+            count += 1
+
+        # add bottom border
+        pstr += "+"
+        for _ in range(len(self.rt_tbl_D)+1):
+            pstr += borderStr
+        pstr += "\n"
+
+        # print the formatted table
+        print(pstr)
 
     ## thread target for the host to keep forwarding data
     def run(self):
