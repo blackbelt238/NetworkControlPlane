@@ -210,17 +210,30 @@ class Router:
     def update_routes(self, p, i):
         pbody = str(p)
         # determine which router sent the update
-        r = pbody[NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+1:NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+3]
+        r = pbody[NetworkPacket.dst_S_length+NetworkPacket.prot_S_length:NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+2]
         # extract the distance vector
-        rvec = json.loads(pbody[NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+3:])
+        rvec = json.loads(pbody[NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+2:])
 
         # for each destination listed in the current routing table,
         # update the cost vector at r to the new value
-        for dst, cvec in self.self.rt_tbl_D.items():
-            cvec[r] = rvec[dst][r]
+        for dst in (self.rt_tbl_D.keys() | rvec.keys()):
+            if dst not in rvec:
+                rvec[dst] = {r: 999}
+            if dst not in self.rt_tbl_D:
+                self.rt_tbl_D[dst] = {self.name: 999}
+
+            self.rt_tbl_D[dst][r] = rvec[dst][r]
 
         # update according to Bellman-Ford equation
+        for y, yvec in self.rt_tbl_D.items(): # for each possible destination
+            for v, vcvec in self.rt_tbl_D.items(): # for each possible neighbor
+                # destination and neighbor cannot be the same
+                if v is y:
+                    continue
 
+                bf = vcvec[self.name] + yvec[v]
+                if bf < yvec[self.name]:
+                    yvec[self.name] = bf
 
         print('%s: Received routing update %s from interface %d' % (self, p, i))
 
@@ -253,6 +266,7 @@ class Router:
                 pstr += "+"
                 for _ in range(len(self.rt_tbl_D)+1):
                     pstr += linesepStr
+                pstr += "\n|"
 
             pstr += key + " |"
             for _, v in self.rt_tbl_D.items():
