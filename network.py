@@ -244,6 +244,9 @@ class Router:
                     ycvec[self.name] = bf
 
         # push update
+        if updated:
+            for i in range(len(self.intf_L)):
+                self.send_routes(i)
 
         print('%s: Received routing update %s from interface %d' % (self, p, i))
 
