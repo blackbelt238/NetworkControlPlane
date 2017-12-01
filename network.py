@@ -141,12 +141,10 @@ class Router:
         self.intf_L = [Interface(max_queue_size) for _ in range(len(cost_D))]
         #save neighbors and interfeces on which we connect to them
         self.cost_D = cost_D    # {neighbor: {interface: cost}}
-        print(cost_D)
 
         # set up the routing table for connected hosts as {destination: {router: cost}}
         self.rt_tbl_D = {neighbor:{self.name: v for k,v in cost_D[neighbor].items()} for neighbor in cost_D}
         self.rt_tbl_D[self.name] = {self.name: 0}
-        print(self.rt_tbl_D)
         print('%s: Initialized routing table' % self)
         self.print_routes()
 
@@ -208,6 +206,8 @@ class Router:
     # and possibly send out routing updates
     #  @param p Packet containing routing information
     def update_routes(self, p, i):
+        print('%s: Received routing update %s from interface %d' % (self, p, i))
+
         pbody = str(p)
         # determine which router sent the update
         r = pbody[NetworkPacket.dst_S_length+NetworkPacket.prot_S_length:NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+2]
@@ -247,9 +247,6 @@ class Router:
         if updated:
             for i in range(len(self.intf_L)):
                 self.send_routes(i)
-
-        print('%s: Received routing update %s from interface %d' % (self, p, i))
-
 
     ## Print routing table
     def print_routes(self):
