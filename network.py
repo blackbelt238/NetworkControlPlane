@@ -213,27 +213,37 @@ class Router:
         r = pbody[NetworkPacket.dst_S_length+NetworkPacket.prot_S_length:NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+2]
         # extract the distance vector
         rvec = json.loads(pbody[NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+2:])
+        keys = self.rt_tbl_D.keys() | rvec.keys() # ensures values that aren't in one of the tables gets considered
+        routers = [key for key in keys if key.startswith("R")]
 
         # for each destination listed in the current routing table,
         # update the cost vector at r to the new value
-        for dst in (self.rt_tbl_D.keys() | rvec.keys()):
+        for dst in keys:
+            # if the updated router does not know about the destination, temporarily add it
             if dst not in rvec:
                 rvec[dst] = {r: 999}
+            # if the current router does not know about the destination, learn about it
             if dst not in self.rt_tbl_D:
                 self.rt_tbl_D[dst] = {self.name: 999}
 
             self.rt_tbl_D[dst][r] = rvec[dst][r]
 
-        # update according to Bellman-Ford equation
-        for y, yvec in self.rt_tbl_D.items(): # for each possible destination
-            for v, vcvec in self.rt_tbl_D.items(): # for each possible neighbor
+        # update routers according to Bellman-Ford equation
+        updated = False
+        for y in keys: # for each possible destination
+            ycvec = self.rt_tbl_D[y]
+            for v in routers: # for each possible neighbor
+                vcvec = self.rt_tbl_D[v]
                 # destination and neighbor cannot be the same
                 if v is y:
                     continue
 
-                bf = vcvec[self.name] + yvec[v]
-                if bf < yvec[self.name]:
-                    yvec[self.name] = bf
+                bf = vcvec[self.name] + ycvec[v]
+                if bf < ycvec[self.name]:
+                    updated = True
+                    ycvec[self.name] = bf
+
+        # push update
 
         print('%s: Received routing update %s from interface %d' % (self, p, i))
 
