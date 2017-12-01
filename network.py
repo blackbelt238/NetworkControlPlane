@@ -232,7 +232,9 @@ class Router:
         # extract the distance vector
         rvec = json.loads(pbody[NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+2:])
         keys = self.rt_tbl_D.keys() | rvec.keys() # ensures values that aren't in one of the tables gets considered
+        print(keys)
         routers = [key for key in keys if key.startswith("R")]
+        print(routers)
 
         # for each destination listed in the current routing table,
         # update the cost vector at r to the new value
@@ -245,16 +247,21 @@ class Router:
                 self.rt_tbl_D[dst] = {self.name: 999}
 
             self.rt_tbl_D[dst][r] = rvec[dst][r]
+        #self.print_routes()
 
         # update routers according to Bellman-Ford equation
         updated = False
         for y in keys: # for each possible destination
-            ycvec = self.rt_tbl_D[y]
             for v in routers: # for each possible neighbor
-                vcvec = self.rt_tbl_D[v]
                 # destination and neighbor cannot be the same
                 if v is y:
                     continue
+                #print(y,v)
+
+                ycvec = self.rt_tbl_D[y]
+                if v not in ycvec:
+                    ycvec[v] = 999
+                vcvec = self.rt_tbl_D[v]
 
                 bf = vcvec[self.name] + ycvec[v]
                 if bf < ycvec[self.name]:
@@ -298,7 +305,10 @@ class Router:
 
             pstr += key + " |"
             for _, v in self.rt_tbl_D.items():
-                pstr += str(v[key]).rjust(3) + "|" # rjust necessary here if costs go into double-digits
+                val = 999
+                if key in v:
+                    val = v[key]
+                pstr += str(val).rjust(3) + "|" # rjust necessary here if costs go into double-digits
             pstr += '\n'
             count += 1
 
