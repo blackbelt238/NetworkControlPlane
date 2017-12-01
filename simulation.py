@@ -16,19 +16,33 @@ if __name__ == '__main__':
     object_L.append(host_1)
     host_2 = network.Host('H2')
     object_L.append(host_2)
+    host_3 = network.Host('H3')
+    object_L.append(host_3)
 
     #create routers and cost tables for reaching neighbors
-    cost_D = {'H1': {0: 1}, 'RB': {1: 1}} # {neighbor: {interface: cost}}
+    cost_D = {'H1': {0: 1}, 'H2': {1: 1}, 'RB': {2: 1}, 'RC': {3: 2}} # {neighbor: {interface: cost}}
     router_a = network.Router(name='RA',
                               cost_D = cost_D,
                               max_queue_size=router_queue_size)
     object_L.append(router_a)
 
-    cost_D = {'H2': {1: 3}, 'RA': {0: 1}} # {neighbor: {interface: cost}}
+    cost_D = {'RA': {0: 1}, 'RD': {1: 1}} # {neighbor: {interface: cost}}
     router_b = network.Router(name='RB',
                               cost_D = cost_D,
                               max_queue_size=router_queue_size)
     object_L.append(router_b)
+
+    cost_D = {'RA': {0: 1}, 'RD': {1: 1}}
+    router_c = network.Router(name='RC',
+                              cost_D = cost_D,
+                              max_queue_size=router_queue_size)
+    object_L.append(router_c)
+
+    cost_D = {'RB': {0: 1}, 'RC': {1: 1}, 'H3': {2: 1}}
+    router_d = network.Router(name='RD',
+                              cost_D = cost_D,
+                              max_queue_size=router_queue_size)
+    object_L.append(router_d)
 
     #create a Link Layer to keep track of links between network nodes
     link_layer = link.LinkLayer()
@@ -36,8 +50,12 @@ if __name__ == '__main__':
 
     #add all the links - need to reflect the connectivity in cost_D tables above
     link_layer.add_link(link.Link(host_1, 0, router_a, 0))
-    link_layer.add_link(link.Link(router_a, 1, router_b, 0))
-    link_layer.add_link(link.Link(router_b, 1, host_2, 0))
+    link_layer.add_link(link.Link(host_2, 0, router_a, 1))
+    link_layer.add_link(link.Link(router_a, 2, router_b, 0))
+    link_layer.add_link(link.Link(router_a, 3, router_c, 0))
+    link_layer.add_link(link.Link(router_b, 1, router_d, 0))
+    link_layer.add_link(link.Link(router_c, 1, router_d, 1))
+    link_layer.add_link(link.Link(router_d, 2, host_3, 0))
 
 
     #start all the objects
