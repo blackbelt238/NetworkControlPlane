@@ -141,6 +141,7 @@ class Router:
         self.intf_L = [Interface(max_queue_size) for _ in range(len(cost_D))]
         #save neighbors and interfeces on which we connect to them
         self.cost_D = cost_D    # {neighbor: {interface: cost}}
+        print(cost_D, "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 
         # set up the routing table for connected hosts as {destination: {router: cost}}
         self.rt_tbl_D = {neighbor:{self.name: v for k,v in cost_D[neighbor].items()} for neighbor in cost_D}
@@ -177,12 +178,26 @@ class Router:
     #  @param i Incoming interface number for packet p
     def forward_packet(self, p, i):
         try:
-            # TODO: Here you will need to implement a lookup into the
-            # forwarding table to find the appropriate outgoing interface
-            # for now we assume the outgoing interface is 1
-            self.intf_L[1].put(p.to_byte_S(), 'out', True)
+            dst = p.dst
+
+            rout = ''
+            rcost = 999
+
+            if dst in self.cost_D:
+                rout = dst
+            else:
+                # lookup into the forwarding table to find the appropriate outgoing interface
+                for router in [key for key in self.cost_D if key.startswith("R")]:
+                    cost = self.rt_tbl_D[dst][router]
+                    if cost < rcost:
+                         rcost = cost
+                         rout = router
+
+            out = list(self.cost_D[rout].keys())[0]
+
+            self.intf_L[out].put(p.to_byte_S(), 'out', True)
             print('%s: forwarding packet "%s" from interface %d to %d' % \
-                (self, p, i, 1))
+                (self, p, i, out))
         except queue.Full:
             print('%s: packet "%s" lost on interface %d' % (self, p, i))
             pass
