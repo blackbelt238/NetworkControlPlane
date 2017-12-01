@@ -185,6 +185,7 @@ class Router:
             # if the destination is a neighbor, ensure the packet is forwarded there
             if dst in self.cost_D:
                 cfwd = dst
+                print("\t" + self.name,"is next to the destination (" + dst + ").",end="")
             else:
                 # uses the routing table to find the lowest cost link to forward along
                 for router in [key for key in self.cost_D if key.startswith("R")]:
@@ -192,8 +193,10 @@ class Router:
                     if cost < ccost:
                          ccost = cost
                          cfwd = router
+                print("\t" + cfwd,"is lowest-costing next hop to the destination (" + dst + "). ", end="")
             # access the cost vector at the determined out destination and retrieve the interface number
             out = list(self.cost_D[cfwd].keys())[0]
+            print("Forward to",cfwd,"along interface",out)
 
             self.intf_L[out].put(p.to_byte_S(), 'out', True)
             print('%s: forwarding packet "%s" from interface %d to %d' % \
