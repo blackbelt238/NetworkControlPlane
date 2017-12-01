@@ -141,7 +141,6 @@ class Router:
         self.intf_L = [Interface(max_queue_size) for _ in range(len(cost_D))]
         #save neighbors and interfeces on which we connect to them
         self.cost_D = cost_D    # {neighbor: {interface: cost}}
-        print(cost_D, "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 
         # set up the routing table for connected hosts as {destination: {router: cost}}
         self.rt_tbl_D = {neighbor:{self.name: v for k,v in cost_D[neighbor].items()} for neighbor in cost_D}
@@ -183,16 +182,17 @@ class Router:
             rout = ''
             rcost = 999
 
+            # if the destination is a neighbor, ensure the packet is forwarded there
             if dst in self.cost_D:
                 rout = dst
             else:
-                # lookup into the forwarding table to find the appropriate outgoing interface
+                # ues the routing table to find the lowest cost
                 for router in [key for key in self.cost_D if key.startswith("R")]:
                     cost = self.rt_tbl_D[dst][router]
                     if cost < rcost:
                          rcost = cost
                          rout = router
-
+            # access the cost vector at the determined out destination and retrieve the interface number
             out = list(self.cost_D[rout].keys())[0]
 
             self.intf_L[out].put(p.to_byte_S(), 'out', True)
