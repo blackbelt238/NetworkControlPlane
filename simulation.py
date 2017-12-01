@@ -32,7 +32,7 @@ if __name__ == '__main__':
                               max_queue_size=router_queue_size)
     object_L.append(router_b)
 
-    cost_D = {'RA': {0: 1}, 'RD': {1: 1}}
+    cost_D = {'RA': {0: 2}, 'RD': {1: 1}}
     router_c = network.Router(name='RC',
                               cost_D = cost_D,
                               max_queue_size=router_queue_size)
@@ -67,8 +67,7 @@ if __name__ == '__main__':
         t.start()
 
     ## compute routing tables
-    for i in range(len(router_a.intf_L)):
-        router_a.send_routes(i) #one update starts the routing process
+    router_a.send_routes(1) #one update starts the routing process
     sleep(simulation_time)  #let the tables converge
     print("Converged routing tables")
     for obj in object_L:
