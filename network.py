@@ -193,7 +193,7 @@ class Router:
     ## send out route update
     # @param i Interface number on which to send out a routing update
     def send_routes(self, i):
-        pbody = self.name + " " + json.dumps(self.rt_tbl_D)
+        pbody = self.name + json.dumps(self.rt_tbl_D)
         #create a routing table update packet
         p = NetworkPacket(0, 'control', pbody)
         try:
@@ -204,11 +204,18 @@ class Router:
             pass
 
 
-    ## forward the packet according to the routing table
+    # update the routing tables according to the received distance vector
+    # and possibly send out routing updates
     #  @param p Packet containing routing information
     def update_routes(self, p, i):
-        #TODO: add logic to update the routing tables and
-        # possibly send out routing updates
+        pbody = str(p)
+        # determine which router sent the update
+        r = pbody[NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+1:NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+3]
+        # extract the distance vector
+        rtable = json.loads(pbody[NetworkPacket.dst_S_length+NetworkPacket.prot_S_length+3:])
+
+        # update according to Bellman-Ford
+
         print('%s: Received routing update %s from interface %d' % (self, p, i))
 
 
