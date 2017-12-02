@@ -189,7 +189,7 @@ class Router:
             else:
                 # uses the routing table to find the lowest cost link to forward along
                 for router in [key for key in self.cost_D if key.startswith("R")]:
-                    cost = self.rt_tbl_D[dst][router]
+                    cost = self.rt_tbl_D[dst][router] + self.rt_tbl_D[router][self.name]
                     if cost < ccost:
                          ccost = cost
                          cfwd = router

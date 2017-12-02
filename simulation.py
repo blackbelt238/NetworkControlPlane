@@ -20,13 +20,13 @@ if __name__ == '__main__':
     object_L.append(host_3)
 
     #create routers and cost tables for reaching neighbors
-    cost_D = {'H1': {0: 1}, 'H2': {1: 1}, 'RB': {2: 2}, 'RC': {3: 4}} # {neighbor: {interface: cost}}
+    cost_D = {'H1': {0: 1}, 'H2': {1: 1}, 'RB': {2: 2}, 'RC': {3: 3}} # {neighbor: {interface: cost}}
     router_a = network.Router(name='RA',
                               cost_D = cost_D,
                               max_queue_size=router_queue_size)
     object_L.append(router_a)
 
-    cost_D = {'RA': {0: 1}, 'RD': {1: 2}} # {neighbor: {interface: cost}}
+    cost_D = {'RA': {0: 1}, 'RD': {1: 3}} # {neighbor: {interface: cost}}
     router_b = network.Router(name='RB',
                               cost_D = cost_D,
                               max_queue_size=router_queue_size)
@@ -38,7 +38,7 @@ if __name__ == '__main__':
                               max_queue_size=router_queue_size)
     object_L.append(router_c)
 
-    cost_D = {'RB': {0: 2}, 'RC': {1: 1}, 'H3': {2: 1}}
+    cost_D = {'RB': {0: 2}, 'RC': {1: 2}, 'H3': {2: 1}}
     router_d = network.Router(name='RD',
                               cost_D = cost_D,
                               max_queue_size=router_queue_size)
@@ -79,8 +79,11 @@ if __name__ == '__main__':
     host_1.udt_send('H3', 'MESSAGE_FROM_H1')
     sleep(simulation_time)
 
+    print('\n')
+
     host_3.udt_send('H1', 'MESSAGE_FROM_H3')
     sleep(simulation_time)
+
 
 
     #join all threads
