@@ -247,7 +247,6 @@ class Router:
                 self.rt_tbl_D[dst] = {self.name: 999}
 
             self.rt_tbl_D[dst][r] = rvec[dst][r]
-        #self.print_routes()
 
         # update routers according to Bellman-Ford equation
         updated = False
@@ -256,7 +255,6 @@ class Router:
                 # destination and neighbor cannot be the same
                 if v is y:
                     continue
-                #print(y,v)
 
                 ycvec = self.rt_tbl_D[y]
                 if v not in ycvec:
