@@ -20,13 +20,13 @@ if __name__ == '__main__':
     object_L.append(host_3)
 
     #create routers and cost tables for reaching neighbors
-    cost_D = {'H1': {0: 1}, 'H2': {1: 1}, 'RB': {2: 1}, 'RC': {3: 2}} # {neighbor: {interface: cost}}
+    cost_D = {'H1': {0: 1}, 'H2': {1: 1}, 'RB': {2: 2}, 'RC': {3: 4}} # {neighbor: {interface: cost}}
     router_a = network.Router(name='RA',
                               cost_D = cost_D,
                               max_queue_size=router_queue_size)
     object_L.append(router_a)
 
-    cost_D = {'RA': {0: 1}, 'RD': {1: 1}} # {neighbor: {interface: cost}}
+    cost_D = {'RA': {0: 1}, 'RD': {1: 2}} # {neighbor: {interface: cost}}
     router_b = network.Router(name='RB',
                               cost_D = cost_D,
                               max_queue_size=router_queue_size)
@@ -38,7 +38,7 @@ if __name__ == '__main__':
                               max_queue_size=router_queue_size)
     object_L.append(router_c)
 
-    cost_D = {'RB': {0: 1}, 'RC': {1: 1}, 'H3': {2: 1}}
+    cost_D = {'RB': {0: 2}, 'RC': {1: 1}, 'H3': {2: 1}}
     router_d = network.Router(name='RD',
                               cost_D = cost_D,
                               max_queue_size=router_queue_size)
@@ -67,7 +67,8 @@ if __name__ == '__main__':
         t.start()
 
     ## compute routing tables
-    router_a.send_routes(1) #one update starts the routing process
+    for i in range(len(router_a.intf_L)):
+        router_a.send_routes(i) #one update starts the routing process
     sleep(simulation_time)  #let the tables converge
     print("Converged routing tables")
     for obj in object_L:
@@ -76,6 +77,9 @@ if __name__ == '__main__':
 
     #send packet from host 1 to host 2
     host_1.udt_send('H3', 'MESSAGE_FROM_H1')
+    sleep(simulation_time)
+
+    host_3.udt_send('H1', 'MESSAGE_FROM_H3')
     sleep(simulation_time)
 
 
